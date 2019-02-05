@@ -161,6 +161,11 @@ function draw() {
                 drop.y += 0.5 * drop.speed;
             }
         }
+        
+        if (collisionCount > 1 && ball.y >= 2 * canvas.height/3) {
+            ball.y = 2 * canvas.height/3;
+            drop.y -= ball.dy;
+        }
         // törmäys
         if (Math.abs(drop.x - ball.x) < (ball.radius + dropRadius) && Math.abs(drop.y - ball.y) < (ball.radius + dropRadius)) {
             ball.y = drop.y - dropRadius;
@@ -207,6 +212,7 @@ function draw() {
             highScore = score;
         }
     score = 0;
+    collisionCount = 0;
 	}
 	// pallon osuessa reunoille
 	if (ball.x < ball.radius) {
