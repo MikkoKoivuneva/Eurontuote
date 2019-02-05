@@ -8,6 +8,9 @@ let firstY = 350;
 let easeOut = 0.04;
 let score = 0;
 let highScore = 0;
+let collisionCount = 0;
+let jumpPower = 16;
+let gravity = 0.4;
 
 let ball = {
     
@@ -53,7 +56,7 @@ window.addEventListener("keyup", controller.keyListener);
 
 // drop variables
 let dropRadius = 15;
-let totalDrops = 7;
+let totalDrops = 15;
 let drops = [];
 for (let i = 0; i < totalDrops; i++) {
     addDrop();
@@ -64,6 +67,7 @@ function addDrop() {
         width: dropRadius,
         x: 0,
         y: 0,
+        color: "#069b00"
     }
     spawnDrop(drop);
     drops.push(drop);
@@ -76,10 +80,28 @@ function spawnDrop(drop) {
              highestY = drops[i].y;
          }
     }
+    drop.color = "#069b00";
+    if (Math.random() >= 0.99) {
+        drop.color = "#ff0000";
+    }
     drop.x = Math.random() * (max - min) + min;
     drop.y = highestY - 100;
     highestY -= dropGap;
-    drop.speed = 0.5;  
+    drop.speed = 0.5;
+    
+    if (Math.random() >= 0.9 && score > 1) {
+        drop.speed *= 1.25;
+    } else if (Math.random() >= 0.9 && score > 49) {
+        drop.speed *= 1.5;
+    } else if (Math.random() >= 0.8 && score > 99) {
+        drop.speed *= 2;
+    } else if (Math.random() >= 0.7 && score > 149) {
+        drop.speed *= 3;
+    } else if (Math.random() >= 0.6 && score > 199) {
+        drop.speed *= 4;
+    } else if (Math.random() >= 0.5 && score > 249) {
+        drop.speed *= 5;
+    }
 }
 
 function mouseMoveHandler(e) {
@@ -88,15 +110,25 @@ function mouseMoveHandler(e) {
     let sqr = Math.sqrt(distanceX * distanceX);
     
     if (sqr > 0) {
-        ball.x += easeOut * distanceX;
+        ball.x += distanceX;
         //v = k * v + (1 - k ) * tv;
     }
 }
 
 function handleClick() {
     while (ball.falling == false) {
-    ball.dy -= 17;
+    ball.dy -= jumpPower;
     ball.falling = true;
+    }
+}
+
+function drawDrops() {
+    for (let i = 0; i < drops.length; i++) {
+        let drop = drops[i];
+        ctx.fillStyle = drop.color;
+        ctx.beginPath();
+        ctx.arc(drop.x, drop.y, drop.width, 0, Math.PI*2);
+        ctx.fill();
     }
 }
 
@@ -112,13 +144,7 @@ function draw() {
 	ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2)
 	ctx.fill();
     
-    for (let i = 0; i < drops.length; i++) {
-        let drop = drops[i];
-        ctx.fillStyle = "#069b00";
-        ctx.beginPath();
-        ctx.arc(drop.x, drop.y, drop.width, 0, Math.PI*2);
-        ctx.fill();
-    }
+    drawDrops();
     
     ctx.font = "16px Arial";
     ctx.fillStyle = "black";
@@ -127,29 +153,33 @@ function draw() {
     
     for (let j = 0; j < drops.length; j++) {
         let drop = drops[j];
-        if(ball.y > canvas.height/3) {
+        if (ball.y > canvas.height/3) {
             drop.y += drop.speed;
         } else {
-            drop.y += 5;
+            drop.y -= ball.dy;
+            if (drop.speed > 0.5) {
+                drop.y += 0.5 * drop.speed;
+            }
         }
         // törmäys
         if (Math.abs(drop.x - ball.x) < (ball.radius + dropRadius) && Math.abs(drop.y - ball.y) < (ball.radius + dropRadius)) {
             ball.y = drop.y - dropRadius;
             ball.dy = 0;
-            ball.dy -= 18;
+            ball.dy -= jumpPower;
             spawnDrop(drop);
             score++;
+            collisionCount++;
             ball.falling = true;
         }
 
         // putoavan pallon osuessa pohjalle
-        if (drop.y - dropRadius > canvas.height) {
+        if (drop.y - dropRadius > canvas.height * 2) {
             spawnDrop(drop);
         }
     }
     
 	if (controller.up && ball.falling == false) {
-        ball.dy -= 17; // hyppyvoima
+        ball.dy -= jumpPower; // hyppyvoima
         ball.falling = true;
     }
 
@@ -161,7 +191,7 @@ function draw() {
         ball.dx += 0.85;
     }
 
-	ball.dy += 0.5; // painovoima
+	ball.dy += gravity; // painovoima
 	ball.x += ball.dx;
 	ball.y += ball.dy;
 	ball.dx *= 0.95; // kitka
