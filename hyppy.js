@@ -7,10 +7,11 @@ let dropGap = 100;
 let firstY = 350;
 let easeOut = 0.04;
 let score = 0;
-let highScore = 0;
 let collisionCount = 0;
-let jumpPower = 16;
-let gravity = 0.4;
+let extraJumps = 0;
+let highScore = 0;
+let jumpPower = 17;
+let gravity = 0.45;
 
 let ball = {
     
@@ -56,7 +57,7 @@ window.addEventListener("keyup", controller.keyListener);
 
 // drop variables
 let dropRadius = 15;
-let totalDrops = 15;
+let totalDrops = 12;
 let drops = [];
 for (let i = 0; i < totalDrops; i++) {
     addDrop();
@@ -67,7 +68,7 @@ function addDrop() {
         width: dropRadius,
         x: 0,
         y: 0,
-        color: "#069b00"
+        color: "#069b00",
     }
     spawnDrop(drop);
     drops.push(drop);
@@ -81,8 +82,10 @@ function spawnDrop(drop) {
          }
     }
     drop.color = "#069b00";
-    if (Math.random() >= 0.99) {
+    if (Math.random() >= 0.98) {
         drop.color = "#ff0000";
+    } else if ( Math.random() >= 0.97) {
+        drop.color = "gold";
     }
     drop.x = Math.random() * (max - min) + min;
     drop.y = highestY - 100;
@@ -132,6 +135,22 @@ function drawDrops() {
     }
 }
 
+function camera(drop) {
+    if (ball.y > canvas.height/3) {
+            drop.y += drop.speed;
+        } else {
+            drop.y -= ball.dy;
+            if (drop.speed > 0.5) {
+                drop.y += 0.5 * drop.speed;
+            }
+        }
+        
+        if (collisionCount > 1 && ball.y >= 3 * canvas.height/4) {
+            ball.y = 3 * canvas.height/4;
+            drop.y -= ball.dy;
+        }
+}
+
 function draw() {
     //canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -149,23 +168,11 @@ function draw() {
     ctx.font = "16px Arial";
     ctx.fillStyle = "black";
     ctx.fillText("Score: " + score, canvas.width - 90, 15);
-    ctx.fillText("Your best: " + highScore, 2, 15);
+    ctx.fillText("Your best: " + extraJumps, 2, 15);
     
     for (let j = 0; j < drops.length; j++) {
         let drop = drops[j];
-        if (ball.y > canvas.height/3) {
-            drop.y += drop.speed;
-        } else {
-            drop.y -= ball.dy;
-            if (drop.speed > 0.5) {
-                drop.y += 0.5 * drop.speed;
-            }
-        }
-        
-        if (collisionCount > 1 && ball.y >= 2 * canvas.height/3) {
-            ball.y = 2 * canvas.height/3;
-            drop.y -= ball.dy;
-        }
+        camera(drop);
         // törmäys
         if (Math.abs(drop.x - ball.x) < (ball.radius + dropRadius) && Math.abs(drop.y - ball.y) < (ball.radius + dropRadius)) {
             ball.y = drop.y - dropRadius;
@@ -175,10 +182,15 @@ function draw() {
             score++;
             collisionCount++;
             ball.falling = true;
+            if (drop.color == "gold") {
+                extraJumps++;
+            }
+            if (drop.color == "#ff0000") {
+                extraJumps--;
+            }
         }
-
         // putoavan pallon osuessa pohjalle
-        if (drop.y - dropRadius > canvas.height * 2) {
+        if (drop.y - dropRadius > canvas.height * 1.75) {
             spawnDrop(drop);
         }
     }
@@ -213,6 +225,7 @@ function draw() {
         }
     score = 0;
     collisionCount = 0;
+    extraJumps = 0;
 	}
 	// pallon osuessa reunoille
 	if (ball.x < ball.radius) {
@@ -225,8 +238,7 @@ function draw() {
     }
     
     if (ball.y < canvas.height/3) {
-        ball.y = canvas.height/3;
-        
+        ball.y = canvas.height/3; 
     }
     
     requestAnimationFrame(draw);
