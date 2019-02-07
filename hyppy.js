@@ -1,25 +1,25 @@
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
 
-let min = 80;
+let min = canvas.width / 9;
 let max = canvas.width - min;
-let dropGap = 100;
+let dropGap = canvas.height / 5.9;
 let firstY = 350;
 let easeOut = 0.04;
 let score = 0;
 let collisionCount = 0;
 let jumps = 0;
 let highScore = 0;
-let jumpPower = 17;
-let gravity = 0.45;
+let jumpPower = canvas.height / 34;
+let gravity = jumpPower / 38;
 
 let ball = {
     
-	radius:20,
+	radius:canvas.width/36,
 	falling:true,
 	x:canvas.width/2,
 	dx:0,
-	y:canvas.height - 20,
+	y:canvas.height - canvas.width/36,
 	dy:0
     
 	};
@@ -58,7 +58,7 @@ document.addEventListener("touchstart", touchHandler);
 document.addEventListener("touchmove", touchHandler);
 
 // drop variables
-let dropRadius = 15;
+let dropRadius = ball.radius*0.75;
 let totalDrops = 12;
 let drops = [];
 for (let i = 0; i < totalDrops; i++) {
@@ -90,7 +90,7 @@ function spawnDrop(drop) {
         drop.color = "gold";
     }
     drop.x = Math.random() * (max - min) + min;
-    drop.y = highestY - 100;
+    drop.y = highestY - dropGap;
     highestY -= dropGap;
     drop.speed = 0.5;
     
@@ -134,6 +134,7 @@ function handleClick() {
 function touchHandler(e) {
     if (e.touches) {
         ball.x = e.touches[0].pageX - canvas.offsetLeft - ball.radius;
+        e.preventDefault();
     }
 }
 
