@@ -8,7 +8,7 @@ let firstY = 350;
 let easeOut = 0.04;
 let score = 0;
 let collisionCount = 0;
-let extraJumps = 0;
+let jumps = 0;
 let highScore = 0;
 let jumpPower = 17;
 let gravity = 0.45;
@@ -54,6 +54,8 @@ window.addEventListener("mousemove", mouseMoveHandler, false);
 canvas.addEventListener("click", handleClick, false);
 window.addEventListener("keydown", controller.keyListener);
 window.addEventListener("keyup", controller.keyListener);
+document.addEventListener("touchstart", touchHandler);
+document.addEventListener("touchmove", touchHandler);
 
 // drop variables
 let dropRadius = 15;
@@ -119,9 +121,19 @@ function mouseMoveHandler(e) {
 }
 
 function handleClick() {
-    while (ball.falling == false) {
+    if (ball.falling == false || jumps > 0) {
+    ball.dy = 0;
     ball.dy -= jumpPower;
     ball.falling = true;
+        if (jumps > 0) {
+        jumps--;
+        }
+    }
+}
+
+function touchHandler(e) {
+    if (e.touches) {
+        ball.x = e.touches[0].pageX - canvas.offsetLeft - ball.radius;
     }
 }
 
@@ -168,7 +180,7 @@ function draw() {
     ctx.font = "16px Arial";
     ctx.fillStyle = "black";
     ctx.fillText("Score: " + score, canvas.width - 90, 15);
-    ctx.fillText("Your best: " + extraJumps, 2, 15);
+    ctx.fillText("Extra jumps: " + jumps, 2, 15);
     
     for (let j = 0; j < drops.length; j++) {
         let drop = drops[j];
@@ -183,10 +195,10 @@ function draw() {
             collisionCount++;
             ball.falling = true;
             if (drop.color == "gold") {
-                extraJumps++;
+                jumps++;
             }
-            if (drop.color == "#ff0000") {
-                extraJumps--;
+            if (drop.color == "#ff0000" && jumps > 0) {
+                jumps--;
             }
         }
         // putoavan pallon osuessa pohjalle
@@ -195,9 +207,13 @@ function draw() {
         }
     }
     
-	if (controller.up && ball.falling == false) {
-        ball.dy -= jumpPower; // hyppyvoima
+	if (controller.up && (ball.falling == false || jumps > 0)) {
+        ball.dy = 0;
+        ball.dy -= jumpPower;
         ball.falling = true;
+        if (jumps > 0) {
+        jumps--;
+        }
     }
 
 	if (controller.left) {
@@ -225,7 +241,7 @@ function draw() {
         }
     score = 0;
     collisionCount = 0;
-    extraJumps = 0;
+    jumps = 0;
 	}
 	// pallon osuessa reunoille
 	if (ball.x < ball.radius) {
