@@ -84,10 +84,18 @@ function spawnDrop(drop) {
          }
     }
     drop.color = "#069b00";
-    if (Math.random() >= 0.98) {
-        drop.color = "#ff0000";
-    } else if ( Math.random() >= 0.97) {
-        drop.color = "gold";
+    if (score < 300) {
+        if (Math.random() >= 0.98) {
+            drop.color = "#ff0000";
+        } else if (Math.random() >= 0.97) {
+            drop.color = "gold";
+        }
+    } if (score > 299) {
+        if (Math.random() >= 0.9) {
+            drop.color = "#ff0000";
+        } else if (Math.random >= 0.89) {
+            drop.color = "gold";
+        }
     }
     drop.x = Math.random() * (max - min) + min;
     drop.y = highestY - dropGap;
@@ -106,6 +114,8 @@ function spawnDrop(drop) {
         drop.speed *= 4;
     } else if (Math.random() >= 0.5 && score > 249) {
         drop.speed *= 5;
+    } else if (Math.random() >= 0.4 && score > 499) {
+        drop.speed *= 7.5;
     }
 }
 
@@ -148,7 +158,7 @@ function drawDrops() {
     }
 }
 
-function camera(drop) {
+function moveScreen(drop) {
     if (ball.y > canvas.height/3) {
             drop.y += drop.speed;
         } else {
@@ -160,7 +170,7 @@ function camera(drop) {
         
         if (collisionCount > 1 && ball.y >= 3 * canvas.height/4) {
             ball.y = 3 * canvas.height/4;
-            drop.y -= ball.dy;
+            drop.y -= 15;
         }
 }
 
@@ -185,22 +195,22 @@ function draw() {
     
     for (let j = 0; j < drops.length; j++) {
         let drop = drops[j];
-        camera(drop);
+        moveScreen(drop);
         // törmäys
         if (Math.abs(drop.x - ball.x) < (ball.radius + dropRadius) && Math.abs(drop.y - ball.y) < (ball.radius + dropRadius)) {
             ball.y = drop.y - dropRadius;
             ball.dy = 0;
             ball.dy -= jumpPower;
-            spawnDrop(drop);
-            score++;
-            collisionCount++;
-            ball.falling = true;
             if (drop.color == "gold") {
                 jumps++;
             }
             if (drop.color == "#ff0000" && jumps > 0) {
                 jumps--;
             }
+            score++;
+            collisionCount++;
+            spawnDrop(drop);
+            ball.falling = true;
         }
         // putoavan pallon osuessa pohjalle
         if (drop.y - dropRadius > canvas.height * 1.75) {
