@@ -124,8 +124,7 @@ function mouseMoveHandler(e) {
     let sqr = Math.sqrt(distanceX * distanceX);
     
     if (sqr > 0) {
-        ball.x += distanceX;
-        //v = k * v + (1 - k ) * tv;
+        ball.x += easeOut * distanceX;
     }
 }
 
