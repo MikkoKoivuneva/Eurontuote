@@ -8,6 +8,7 @@ let firstY = 350;
 let easeOut = 0.04;
 let score = 0;
 let collisionCount = 0;
+let altitude = 280;
 let jumps = 0;
 let highScore = 0;
 let jumpPower = canvas.height / 34;
@@ -90,12 +91,10 @@ function spawnDrop(drop) {
         } else if (Math.random() >= 0.97) {
             drop.color = "gold";
         }
-    } if (score > 299) {
-        if (Math.random() >= 0.9) {
+    } else {
+        if (Math.random() >= 0.97) {
             drop.color = "#ff0000";
-        } else if (Math.random >= 0.89) {
-            drop.color = "gold";
-        }
+        } 
     }
     drop.x = Math.random() * (max - min) + min;
     drop.y = highestY - dropGap;
@@ -168,17 +167,19 @@ function moveScreen(drop) {
             }
         }
         
-        if (collisionCount > 1 && ball.y >= 3 * canvas.height/4) {
-            ball.y = 3 * canvas.height/4;
-            drop.y -= 15;
-        }
+    if (altitude >= 3 * canvas.height/4 && ball.y >= 3 * canvas.height/4) {
+        ball.y = 3 * canvas.height/4;
+        drop.y -= 16;
+    }
 }
 
 function draw() {
     //canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-	ctx.fillStyle = "#eee";
-	ctx.fillRect(0, 0, canvas.width, canvas.height);
+    let background = new Image();
+    background.src = "background1.jpg";
+    background.onload = function(){
+    ctx.drawImage(background,0,0);
+}
     
     //pallo
 	ctx.fillStyle = "#457eff";
@@ -235,12 +236,13 @@ function draw() {
         ball.dx += 0.85;
     }
 
+    altitude -= ball.dy;
 	ball.dy += gravity; // painovoima
 	ball.x += ball.dx;
 	ball.y += ball.dy;
 	ball.dx *= 0.95; // kitka
 	ball.dy *= 0.99; // ilmanvastus
-
+    
 	// pallon tippuessa maahan
 	if (ball.y > canvas.height - ball.radius) {
         
@@ -253,6 +255,7 @@ function draw() {
     score = 0;
     collisionCount = 0;
     jumps = 0;
+    altitude = 280;
 	}
 	// pallon osuessa reunoille
 	if (ball.x < ball.radius) {
