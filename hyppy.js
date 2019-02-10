@@ -124,7 +124,7 @@ function mouseMoveHandler(e) {
     let sqr = Math.sqrt(distanceX * distanceX);
     
     if (sqr > 0) {
-        ball.x += easeOut * distanceX;
+        ball.x += distanceX;
     }
 }
 
@@ -173,14 +173,12 @@ function moveScreen(drop) {
 }
 
 function draw() {
-    //canvas
+    
     let background = new Image();
     background.src = "background1.jpg";
     background.onload = function(){
     ctx.drawImage(background,0,0);
 }
-    
-    //pallo
 	ctx.fillStyle = "#457eff";
 	ctx.beginPath();
 	ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2)
@@ -196,7 +194,7 @@ function draw() {
     for (let j = 0; j < drops.length; j++) {
         let drop = drops[j];
         moveScreen(drop);
-        // törmäys
+        
         if (Math.abs(drop.x - ball.x) < (ball.radius + dropRadius) && Math.abs(drop.y - ball.y) < (ball.radius + dropRadius)) {
             ball.y = drop.y - dropRadius;
             ball.dy = 0;
@@ -212,7 +210,7 @@ function draw() {
             spawnDrop(drop);
             ball.falling = true;
         }
-        // putoavan pallon osuessa pohjalle
+        
         if (drop.y - dropRadius > canvas.height * 1.75) {
             spawnDrop(drop);
         }
@@ -236,18 +234,17 @@ function draw() {
     }
 
     altitude -= ball.dy;
-	ball.dy += gravity; // painovoima
+	ball.dy += gravity;
 	ball.x += ball.dx;
 	ball.y += ball.dy;
-	ball.dx *= 0.95; // kitka
-	ball.dy *= 0.99; // ilmanvastus
+	ball.dx *= 0.95;
+	ball.dy *= 0.99;
     
-	// pallon tippuessa maahan
 	if (ball.y > canvas.height - ball.radius) {
         
 	ball.falling = false;
 	ball.y = canvas.height - ball.radius;
-	ball.dy *= -0; // pomppuefekti
+	ball.dy *= -0;
         if (score > highScore) {
             highScore = score;
         }
@@ -256,7 +253,7 @@ function draw() {
     jumps = 0;
     altitude = 280;
 	}
-	// pallon osuessa reunoille
+	
 	if (ball.x < ball.radius) {
         ball.x += 2;
         ball.dx *= -1;
