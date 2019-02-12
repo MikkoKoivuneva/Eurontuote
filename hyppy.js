@@ -6,15 +6,16 @@ canvas.style.height = window.innerHeight + "px";
 let min = canvas.width / 9;
 let max = canvas.width - min;
 let dropGap = canvas.height / 5.9;
-let firstY = 350;
+let firstY = 35 * canvas.height / 59;
 let easeOut = 0.04;
 let score = 0;
 let collisionCount = 0;
-let altitude = 28 * canvas.height / 59;
+let altitude = -1 * 10 * canvas.height / 59;
 let jumps = 0;
 let highScore = 0;
 let jumpPower = canvas.height / 34;
 let gravity = jumpPower / 38;
+let altitudeFixer = -0.3 * canvas.height + 203;
 
 let ball = {
     
@@ -167,7 +168,7 @@ function moveScreen(drop) {
             }
         }
         
-    if (altitude >= 3 * canvas.height/4 && ball.y >= 3 * canvas.height/4) {
+    if (altitude - altitudeFixer >= 3 * canvas.height/4 && ball.y >= 3 * canvas.height/4) {
         ball.y = 3 * canvas.height/4;
         drop.y -= 16;
     }
