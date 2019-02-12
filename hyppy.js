@@ -1,5 +1,7 @@
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
+canvas.style.width = window.innerWidth + "px";
+canvas.style.height = window.innerHeight + "px";
 
 let min = canvas.width / 9;
 let max = canvas.width - min;
@@ -8,7 +10,7 @@ let firstY = 350;
 let easeOut = 0.04;
 let score = 0;
 let collisionCount = 0;
-let altitude = 280;
+let altitude = 28 * canvas.height / 59;
 let jumps = 0;
 let highScore = 0;
 let jumpPower = canvas.height / 34;
@@ -58,8 +60,7 @@ window.addEventListener("keyup", controller.keyListener);
 document.addEventListener("touchstart", touchHandler);
 document.addEventListener("touchmove", touchHandler);
 
-// drop variables
-let dropRadius = ball.radius*0.75;
+let dropRadius = ball.radius * 0.75;
 let totalDrops = 12;
 let drops = [];
 for (let i = 0; i < totalDrops; i++) {
@@ -173,12 +174,14 @@ function moveScreen(drop) {
 }
 
 function draw() {
-    
+    //canvas
     let background = new Image();
     background.src = "background1.jpg";
     background.onload = function(){
     ctx.drawImage(background,0,0);
 }
+    
+    //pallo
 	ctx.fillStyle = "#457eff";
 	ctx.beginPath();
 	ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2)
@@ -194,7 +197,7 @@ function draw() {
     for (let j = 0; j < drops.length; j++) {
         let drop = drops[j];
         moveScreen(drop);
-        
+        // törmäys
         if (Math.abs(drop.x - ball.x) < (ball.radius + dropRadius) && Math.abs(drop.y - ball.y) < (ball.radius + dropRadius)) {
             ball.y = drop.y - dropRadius;
             ball.dy = 0;
@@ -210,7 +213,7 @@ function draw() {
             spawnDrop(drop);
             ball.falling = true;
         }
-        
+        // putoavan pallon osuessa pohjalle
         if (drop.y - dropRadius > canvas.height * 1.75) {
             spawnDrop(drop);
         }
@@ -234,17 +237,18 @@ function draw() {
     }
 
     altitude -= ball.dy;
-	ball.dy += gravity;
+	ball.dy += gravity; // painovoima
 	ball.x += ball.dx;
 	ball.y += ball.dy;
-	ball.dx *= 0.95;
-	ball.dy *= 0.99;
+	ball.dx *= 0.95; // kitka
+	ball.dy *= 0.99; // ilmanvastus
     
+	// pallon tippuessa maahan
 	if (ball.y > canvas.height - ball.radius) {
         
 	ball.falling = false;
 	ball.y = canvas.height - ball.radius;
-	ball.dy *= -0;
+	ball.dy *= -0; // pomppuefekti
         if (score > highScore) {
             highScore = score;
         }
@@ -253,7 +257,7 @@ function draw() {
     jumps = 0;
     altitude = 280;
 	}
-	
+	// pallon osuessa reunoille
 	if (ball.x < ball.radius) {
         ball.x += 2;
         ball.dx *= -1;
