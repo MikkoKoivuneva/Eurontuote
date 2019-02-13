@@ -16,6 +16,7 @@ let highScore = 0;
 let jumpPower = canvas.height / 34;
 let gravity = jumpPower / 38;
 let altitudeFixer = -0.3 * canvas.height + 203;
+let gameIsOver = false;
 
 let ball = {
     
@@ -132,17 +133,22 @@ function mouseMoveHandler(e) {
 
 function handleClick() {
     if (ball.falling == false || jumps > 0) {
-    ball.dy = 0;
-    ball.dy -= jumpPower;
-    ball.falling = true;
+        ball.dy = 0;
+        ball.dy -= jumpPower;
+        ball.falling = true;
         if (jumps > 0) {
-        jumps--;
+            jumps--;
         }
+    }
+    
+    if (gameIsOver == true) {
+        gameIsOver = false;
+        location.reload();
     }
 }
 
 function touchHandler(e) {
-    if (e.touches) {
+    if (e.touches && gameStarted == true) {
         ball.x = e.touches[0].pageX - canvas.offsetLeft - ball.radius;
         e.preventDefault();
     }
@@ -174,25 +180,35 @@ function moveScreen(drop) {
     }
 }
 
-function draw() {
-    //canvas
+function drawCanvas() {
     let background = new Image();
     background.src = "background1.jpg";
     background.onload = function(){
-    ctx.drawImage(background,0,0);
+        ctx.drawImage(background,0,0);
+        
+        if (gameIsOver == true) {
+            gameOver();
+        }
+    }
 }
+
+function draw() {
     
-    //pallo
+    drawCanvas();
+    
 	ctx.fillStyle = "#457eff";
 	ctx.beginPath();
 	ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2)
 	ctx.fill();
     
-    drawDrops();
+    if (gameIsOver == false) {
+        drawDrops();
+    }
     
     ctx.font = "16px Arial";
     ctx.fillStyle = "black";
     ctx.fillText("Score: " + score, canvas.width - 90, 15);
+    ctx.textAlign = "left";
     ctx.fillText("Extra jumps: " + jumps, 2, 15);
     
     for (let j = 0; j < drops.length; j++) {
@@ -217,6 +233,14 @@ function draw() {
         // putoavan pallon osuessa pohjalle
         if (drop.y - dropRadius > canvas.height * 1.75) {
             spawnDrop(drop);
+        }
+        
+        if (gameIsOver == true) {
+            drop.speed = 0;
+        }
+        
+        if(Math.abs(ball.y - drop.y) > 3500) {
+            gameIsOver = true;
         }
     }
     
@@ -244,19 +268,24 @@ function draw() {
 	ball.dx *= 0.95; // kitka
 	ball.dy *= 0.99; // ilmanvastus
     
+    if (gameIsOver == true) {
+        ball.y = canvas.height - ball.radius;
+    }
+    
 	// pallon tippuessa maahan
 	if (ball.y > canvas.height - ball.radius) {
         
 	ball.falling = false;
 	ball.y = canvas.height - ball.radius;
 	ball.dy *= -0; // pomppuefekti
+    altitude = 28 * canvas.height/59;
         if (score > highScore) {
             highScore = score;
         }
-    score = 0;
-    collisionCount = 0;
-    jumps = 0;
-    altitude = 280;
+        if (score > 0) {
+            gameIsOver = true;
+        }
+    
 	}
 	// pallon osuessa reunoille
 	if (ball.x < ball.radius) {
@@ -274,5 +303,16 @@ function draw() {
     
     requestAnimationFrame(draw);
 }
-  
+
+function gameOver() {
+        ctx.font = "20px Arial";
+        ctx.fillStyle = "Black";
+        ctx.textAlign = "center";
+        ctx.fillText("Final score: " + score, canvas.width/2, canvas.height/3);
+        ctx.fillText("Touch to play again", canvas.width/2, canvas.height/2);
+        ctx.globalAlpha = 0.2;
+        ctx.fillRect(canvas.width/5, canvas.height/4, 3 * canvas.width/5, canvas.height/2);
+        ctx.globalAlpha = 1.0;
+}
+
 draw();
