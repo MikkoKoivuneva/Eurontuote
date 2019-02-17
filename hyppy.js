@@ -1,5 +1,6 @@
 let canvas = document.getElementById("canvas");
 let ctx = canvas.getContext("2d");
+
 canvas.style.width = window.innerWidth + "px";
 canvas.style.height = window.innerHeight + "px";
 
@@ -8,15 +9,16 @@ let max = canvas.width - min;
 let dropGap = canvas.height / 5.9;
 let firstY = 35 * canvas.height / 59;
 let easeOut = 0.04;
-let score = 0;
+let score = 1500;
 let collisionCount = 0;
 let altitude = -1 * 10 * canvas.height / 59;
-let jumps = 0;
+let jumps = 1;
 let highScore = 0;
 let jumpPower = canvas.height / 34;
 let gravity = jumpPower / 38;
 let altitudeFixer = -0.3 * canvas.height + 203;
 let gameIsOver = false;
+let hasJumped = false;
 
 let ball = {
     
@@ -74,7 +76,7 @@ function addDrop() {
         width: dropRadius,
         x: 0,
         y: 0,
-        color: "#069b00",
+        color: "#fff500",
     }
     spawnDrop(drop);
     drops.push(drop);
@@ -87,17 +89,31 @@ function spawnDrop(drop) {
              highestY = drops[i].y;
          }
     }
-    drop.color = "#069b00";
-    if (score < 300) {
-        if (Math.random() >= 0.98) {
-            drop.color = "#ff0000";
-        } else if (Math.random() >= 0.97) {
-            drop.color = "gold";
+    drop.color = "#fff500";
+    if (score < 500) {
+        if (Math.random() >= 0.98 && jumps < 5) {
+            drop.color = "white";
+        } else if (Math.random() >= 0.96 && jumps > 0) {
+            drop.color = "#000000";
+        }
+    } else if (score < 1000) {
+        if (Math.random() >= 0.99 && jumps < 5) {
+            drop.color = "white";
+        } else if (Math.random() >= 0.97 && jumps > 0) {
+            drop.color = "#000000";
+        }
+    } else if (score < 1500) {
+        if (Math.random() >= 0.995 && jumps < 2) {
+            drop.color = "white";
+        } else if (Math.random() >= 0.98 && jumps > 0) {
+            drop.color = "#000000";
         }
     } else {
-        if (Math.random() >= 0.97) {
-            drop.color = "#ff0000";
-        } 
+        if (Math.random() >= 0.995 && jumps < 1) {
+            drop.color = "white";
+        } else if (Math.random() >= 0.97 && jumps > 0) {
+            drop.color = "#000000";
+        }
     }
     drop.x = Math.random() * (max - min) + min;
     drop.y = highestY - dropGap;
@@ -131,6 +147,12 @@ function mouseMoveHandler(e) {
     }
 }
 
+function preventBehavior(e) {
+    e.preventDefault(); 
+}
+
+document.addEventListener("touchmove", preventBehavior, {passive: false});
+
 function handleClick() {
     if (ball.falling == false || jumps > 0) {
         ball.dy = 0;
@@ -145,10 +167,11 @@ function handleClick() {
         gameIsOver = false;
         location.reload();
     }
+    hasJumped = true;
 }
 
 function touchHandler(e) {
-    if (e.touches && gameStarted == true) {
+    if (e.touches) {
         ball.x = e.touches[0].pageX - canvas.offsetLeft - ball.radius;
         e.preventDefault();
     }
@@ -182,7 +205,7 @@ function moveScreen(drop) {
 
 function drawCanvas() {
     let background = new Image();
-    background.src = "background1.jpg";
+    background.src = "Hell1.2.jpg";
     background.onload = function(){
         ctx.drawImage(background,0,0);
         
@@ -192,11 +215,29 @@ function drawCanvas() {
     }
 }
 
+function drawInstructions() {
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = "white";
+    ctx.fillRect(canvas.width/5, canvas.height/4, 3 * canvas.width/5, canvas.height/2);
+    ctx.globalAlpha = 1.0;
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "center";
+    ctx.fillText("Move with your finger, tap to jump", canvas.width/2, canvas.height/2);
+}
+
+function satan666() {
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.globalAlpha = 1.0;
+}
+
 function draw() {
     
     drawCanvas();
     
-	ctx.fillStyle = "#457eff";
+	ctx.fillStyle = "#3b0067";
 	ctx.beginPath();
 	ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2)
 	ctx.fill();
@@ -207,9 +248,13 @@ function draw() {
     
     ctx.font = "16px Arial";
     ctx.fillStyle = "black";
-    ctx.fillText("Score: " + score, canvas.width - 90, 15);
+    ctx.fillText("Score: " + score, canvas.width - 90, 16);
     ctx.textAlign = "left";
-    ctx.fillText("Extra jumps: " + jumps, 2, 15);
+    ctx.fillText("Extra jumps: " + jumps, 2, 16);
+    
+    if (hasJumped == false && score < 1) {
+        drawInstructions();
+    }
     
     for (let j = 0; j < drops.length; j++) {
         let drop = drops[j];
@@ -219,10 +264,10 @@ function draw() {
             ball.y = drop.y - dropRadius;
             ball.dy = 0;
             ball.dy -= jumpPower;
-            if (drop.color == "gold") {
+            if (drop.color == "white") {
                 jumps++;
             }
-            if (drop.color == "#ff0000" && jumps > 0) {
+            if (drop.color == "#000000" && jumps > 0) {
                 jumps--;
             }
             score++;
@@ -233,6 +278,14 @@ function draw() {
         // putoavan pallon osuessa pohjalle
         if (drop.y - dropRadius > canvas.height * 1.75) {
             spawnDrop(drop);
+        }
+        
+        if (score >= 666 && score < 674) {
+            drop.color = "red";
+        }
+        
+        if (score == 666) {
+            satan666();
         }
         
         if (gameIsOver == true) {
@@ -282,7 +335,7 @@ function draw() {
         if (score > highScore) {
             highScore = score;
         }
-        if (score > 0) {
+        if (score > 0 && hasJumped == true) {
             gameIsOver = true;
         }
     
@@ -305,14 +358,17 @@ function draw() {
 }
 
 function gameOver() {
-        ctx.font = "20px Arial";
-        ctx.fillStyle = "Black";
-        ctx.textAlign = "center";
-        ctx.fillText("Final score: " + score, canvas.width/2, canvas.height/3);
-        ctx.fillText("Touch to play again", canvas.width/2, canvas.height/2);
-        ctx.globalAlpha = 0.2;
-        ctx.fillRect(canvas.width/5, canvas.height/4, 3 * canvas.width/5, canvas.height/2);
-        ctx.globalAlpha = 1.0;
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = "white";
+    ctx.fillRect(canvas.width/5, canvas.height/4, 3 * canvas.width/5, canvas.height/2);
+    ctx.globalAlpha = 1.0;
+    ctx.font = "20px Arial";
+    ctx.fillStyle = "black";
+    ctx.textAlign = "center";
+    ctx.fillText("Final score: " + score, canvas.width/2, canvas.height/3);
+    ctx.fillText("Tap to play again", canvas.width/2, canvas.height/2);
+    ctx.fillText("(White balls give you extra jumps,", canvas.width/2, 1.90*canvas.height/3);
+    ctx.fillText("black ball takes one away)", canvas.width/2, 2.06 * canvas.height/3);
 }
 
 draw();
